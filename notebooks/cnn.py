@@ -41,7 +41,6 @@ print(f"이미지 shape: {sample.shape}")
 """
 
 transform_train = transforms.Compose([
-    transforms.Resize((224, 224)),
     transforms.RandomHorizontalFlip(p=0.5),
     transforms.RandomVerticalFlip(p=0.5),
     transforms.RandomRotation(degrees=15),
@@ -51,7 +50,6 @@ transform_train = transforms.Compose([
 ])
 
 transform_val = transforms.Compose([
-    transforms.Resize((224, 224)),
     transforms.ToTensor(),
     transforms.Normalize(mean=[0.5, 0.5, 0.5], std=[0.5, 0.5, 0.5])
 ])
@@ -81,20 +79,47 @@ train_dataset = EuroSATDataset(train, transform=transform_train)
 validation_dataset = EuroSATDataset(validation, transform=transform_val)
 
 train_loader = DataLoader(train_dataset, batch_size=128, shuffle=True)
-validation_loader = DataLoader(validation_dataset, batch_size=128, shuffle=False)
+validation_loader = DataLoader(validation_dataset, batch_size=32, shuffle=False)
 
 sample_batch = next(iter(train_loader))[0]
 print(f"배치 shape: {sample_batch.shape}")
 
-"""## 4. 모델 정의
+"""## 4. 모델 정의"""
+class EuroSAT(nn.Module):
+  def __init__(self):
+    super().__init__()
+    self.conv1 = nn.Conv2d(3, 16, 3, padding=1)
+    self.max1 = nn.MaxPool2d(2)                     # [16,32,32]
+    self.conv2 = nn.Conv2d(16, 32, 3, padding=1) 
+    self.max2 = nn.MaxPool2d(2)                     # [32,16,16]
+    self.conv3 = nn.Conv2d(32, 64, 3, padding=1) 
+    self.max3 = nn.MaxPool2d(2)                     # [64,8,8]
+    self.relu = nn.ReLU()
+    self.fc1 = nn.Linear(64*8*8, 256)
+    self.fc2 = nn.Linear(256, 128) 
+    self.fc3 = nn.Linear(128, 10)  
+    self.dropout = nn.Dropout(0.4)
+    self.bn1 = nn.BatchNorm2d(16)
+    self.bn2 = nn.BatchNorm2d(32)
+    self.bn3 = nn.BatchNorm2d(64)
 
-ResNet18을 처음부터 학습 (pretrained=False)
-"""
+  def forward(self, x):
+    x = self.relu(self.bn1(self.conv1(x)))
+    x = self.max1(x)
+    x = self.relu(self.bn2(self.conv2(x)))
+    x = self.max2(x)
+    x = self.relu(self.bn3(self.conv3(x)))
+    x = self.max3(x)
+    x = torch.flatten(x, 1)
+    x = self.dropout(x)
+    x = self.relu(self.fc1(x))
+    x = self.dropout(x)
+    x = self.relu(self.fc2(x))
+    x = self.fc3(x)         
+    return x
 
-model = models.resnet18(pretrained=False, num_classes=10)
-
-total_params = sum(p.numel() for p in model.parameters())
-print(f"파라미터 수: {total_params:,}")
+model = EuroSAT()
+print(model)
 
 """## 5. 학습 설정"""
 
