@@ -74,9 +74,9 @@ Convolution 연산을 통해 이미지의 지역적 특징을 추출하는 대�
 eurosat-cnn-vit-mlp/
 │
 ├── notebooks/
-│   ├── cnn.ipynb           # CNN 학습 및 평가
-│   ├── vit.ipynb           # ViT 학습 및 평가
-│   └── mlp_mixer.ipynb     # MLP-Mixer 학습 및 평가
+│   ├── cnn.py              # CNN 학습 및 평가
+│   ├── ViT.py              # ViT 학습 및 평가
+│   └── mlp_mixer.py        # MLP-Mixer 학습 및 평가
 │
 ├── results/
 │   ├── CNN_loss_acc_visualize.PNG
@@ -130,7 +130,8 @@ eurosat-cnn-vit-mlp/
 
 - 세 모델 중 가장 낮은 성능을 기록했습니다.
 - Convolution 연산은 지역적 패턴 추출에 강하지만, EuroSAT의 위성 이미지처럼 **전역적 구조**가 중요한 데이터에서는 표현력이 제한될 수 있습니다.
-- 학습 속도는 빠르나 안정석으로 수렴하지 못하는 경향이 나타났습니다.
+- 학습 속도는 빠르나 안정적으로 수렴하지 못하는 경향이 나타났습니다.
+
 ### ViT
 
 - CNN보다 높은 성능을 보이며 중간 순위를 기록했습니다.
@@ -142,6 +143,7 @@ eurosat-cnn-vit-mlp/
 - 세 모델 중 가장 높은 성능을 달성했습니다.
 - Token Mixing과 Channel Mixing의 조합이 EuroSAT의 64×64 고정 크기 패치 이미지에 적합하게 작동한 것으로 보입니다.
 - Convolution이나 Attention 없이도 위성 이미지의 공간적 특징을 충분히 학습할 수 있음을 보여주는 결과입니다.
+
 ---
 
 ## 결론
